@@ -115,3 +115,53 @@ pacman -S grub efibootmgr base-devel linux-headers networkmanager network-manage
 ```
 HOOKS="base keyboard udev autodetect modconf block keymap encrypt btrfs filesystems"
 ```
+![image](https://user-images.githubusercontent.com/52444457/134767266-00c88cde-cd1c-4a67-908c-676140d0cb07.png)
+
+```mkinitcpio -p linux```
+
+Установка загрузчика
+
+```bootctl --path=/boot install```
+
+Узнаем свой UUID
+```
+blkid -s UUID -o value /dev/sda2
+```
+Создаем и заполняем файл /boot/loader/entries/arch.conf, включая свой UUID:
+```
+title Arch Linux
+linux /vmlinuz-linux
+initrd /amd-ucode.img
+initrd /initramfs-linux.img
+options cryptdevice=UUID=<UUID-OF-ROOT-PARTITION>:luks:allow-discards root=/dev/mapper/luks rootflags=subvol=@ rd.luks.options=discard rw
+```
+Очищаем файл boot/loader/loader.conf и добавляем свои строки:
+```
+default arch.conf
+timeout 4
+console-mode max
+editor  no
+```
+Добавляем пользователя
+```
+useradd -mG wheel {username}
+passwd {username}
+EDITOR=nvim visudo
+```
+![image](https://user-images.githubusercontent.com/52444457/134767277-1f450e84-73a0-45b8-b5c1-130a086d938a.png)
+```
+systemctl enable NetworkManager
+```
+```
+exit
+umount -R /mnt
+reboot
+```
+
+## After install
+```
+nrfkill unblock all
+nmtui
+sudo pacmna -Syu sway
+```
+...
